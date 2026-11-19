@@ -129,6 +129,12 @@ TSR-Library-Management-App/
 - **Genre report:** genre labels differing only by case count together. Ties use alphabetical order ignoring case. Blank genres are shown as `(Unspecified)` when borrowed. No borrowed books means `None`.
 - **Digital borrowing:** follows the same single-book borrowing rules as physical books, as required by the common borrowing workflow.
 
+## Reading the code as a beginner
+
+Start with `Main.java` to see the seven menu choices. Then read `Book.java`, followed by `PhysicalBook.java` and `DigitalBook.java`. Next, read `BookService.java` for adding and searching, `ReportGenerator.java` for counting, and `FileStorage.java` for saving and loading. `InputValidator.java` and the enums support these classes.
+
+The code uses ordinary loops for checking ISBNs and counting genres, descriptive variable names, and short comments for the less obvious rules. Simple getters and switch expressions stay compact. Saved-file fields and application behavior are unchanged by this readability refinement.
+
 ## Optional Java verification checks
 
 From the project root:

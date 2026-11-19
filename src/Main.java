@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+// Starting point: show the menu, read input, and call the right service.
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final BookService service = new BookService();
@@ -25,6 +26,7 @@ public class Main {
             scanner.close();
             return;
         }
+        // Keep showing the menu until Save & Exit succeeds or terminal input closes.
         try {
             boolean running = true;
             while (running) {
@@ -37,7 +39,7 @@ public class Main {
                         case "4" -> borrowBook();
                         case "5" -> returnBook();
                         case "6" -> new ReportGenerator().generateReport(service.getAllBooks());
-                        case "7" -> { if (save()) running = false; }
+                        case "7" -> running = !save(); // Stop only after a successful save.
                         default -> System.out.println("Invalid choice. Enter a number from 1 to 7.");
                     }
                 } catch (IllegalArgumentException e) {
@@ -113,15 +115,15 @@ public class Main {
                 break;
             } catch (IllegalArgumentException e) { System.out.println(e.getMessage()); }
         }
-        displayBooks(service.search(field, read("Keyword (leave empty for all): ")));
+        String keyword = read("Keyword (leave empty for all): ");
+        displayBooks(service.search(field, keyword));
     }
 
     private static void borrowBook() {
         int id = InputValidator.number(read("Book ID: "), "Book ID");
         Book book = service.findById(id);
         if (book.getStatus() != BookStatus.AVAILABLE) {
-            System.out.println("Book is " + book.getStatus() + "; borrower/reservation holder: "
-                    + (book.getBorrowerName().isEmpty() ? "None recorded" : book.getBorrowerName()) + ".");
+            System.out.println(book.unavailableMessage());
             return;
         }
         service.borrow(id, read("Borrower name: "));
@@ -129,7 +131,8 @@ public class Main {
     }
 
     private static void returnBook() {
-        service.returnBook(InputValidator.number(read("Book ID: "), "Book ID"));
+        int id = InputValidator.number(read("Book ID: "), "Book ID");
+        service.returnBook(id);
         System.out.println("Book returned successfully. Status: AVAILABLE.");
     }
 

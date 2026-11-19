@@ -12,21 +12,27 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+// Keeps the library in memory and handles adding, finding, and searching books.
 public class BookService {
     private final List<Book> books = new ArrayList<>();
-    private long nextId = 1;
+    private long nextId = 1; // long lets us detect when int IDs have run out.
 
     public Book addBook(String title, String author, String isbn, String genre, int year,
                         BookType type, String details) {
         String validIsbn = InputValidator.required(isbn, "ISBN");
-        if (books.stream().anyMatch(book -> book.getIsbn().equalsIgnoreCase(validIsbn))) {
-            throw new IllegalArgumentException("A book with this ISBN already exists.");
+        for (Book book : books) {
+            if (book.getIsbn().equalsIgnoreCase(validIsbn)) {
+                throw new IllegalArgumentException("A book with this ISBN already exists.");
+            }
         }
         if (type == null) throw new IllegalArgumentException("Book type is required.");
         if (nextId > Integer.MAX_VALUE) throw new IllegalArgumentException("No more book IDs are available.");
-        Book book = type == BookType.PHYSICAL
-                ? new PhysicalBook((int) nextId, title, author, validIsbn, genre, year, details)
-                : new DigitalBook((int) nextId, title, author, validIsbn, genre, year, details);
+        Book book;
+        if (type == BookType.PHYSICAL) {
+            book = new PhysicalBook((int) nextId, title, author, validIsbn, genre, year, details);
+        } else {
+            book = new DigitalBook((int) nextId, title, author, validIsbn, genre, year, details);
+        }
         books.add(book);
         nextId++;
         return book;
@@ -35,7 +41,9 @@ public class BookService {
     public List<Book> getAllBooks() { return new ArrayList<>(books); }
 
     public Book findById(int id) {
-        for (Book book : books) if (book.getId() == id) return book;
+        for (Book book : books) {
+            if (book.getId() == id) return book;
+        }
         throw new IllegalArgumentException("No book found with ID " + id + ".");
     }
 
@@ -62,11 +70,16 @@ public class BookService {
         Set<String> isbns = new HashSet<>();
         long candidateId = 1;
         for (Book book : saved) {
-            if (!ids.add(book.getId()) || !isbns.add(book.getIsbn().toLowerCase(Locale.ROOT))) {
+            String isbn = book.getIsbn().toLowerCase(Locale.ROOT);
+            if (ids.contains(book.getId()) || isbns.contains(isbn)) {
                 throw new IllegalArgumentException("Duplicate saved ID or ISBN.");
             }
-            candidateId = Math.max(candidateId, (long) book.getId() + 1);
+            ids.add(book.getId());
+            isbns.add(isbn);
+            // The next ID must be larger than every restored ID.
+            if (book.getId() >= candidateId) candidateId = (long) book.getId() + 1;
         }
+        // Replace the library only after all saved records pass validation.
         books.clear();
         books.addAll(saved);
         nextId = candidateId;

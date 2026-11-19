@@ -3,8 +3,9 @@ package validation;
 import enums.BookType;
 import enums.SearchField;
 
+// Shared checks: return a valid value or explain why the input is invalid.
 public final class InputValidator {
-    private InputValidator() { }
+    private InputValidator() { } // Call these static methods without creating an object.
 
     public static String required(String value, String field) {
         if (value == null || value.trim().isEmpty()) {
@@ -13,6 +14,7 @@ public final class InputValidator {
         return value.trim();
     }
 
+    // parseInt rejects letters, decimals, and numbers outside the int range.
     public static int number(String value, String field) {
         try {
             return Integer.parseInt(value.trim());

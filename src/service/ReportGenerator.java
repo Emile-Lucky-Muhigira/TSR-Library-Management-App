@@ -7,21 +7,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+// Counts the books as they are now, not their borrowing history.
 public class ReportGenerator {
     public String mostBorrowedGenre(List<Book> books) {
+        // TreeMap keeps genres alphabetical and treats Fiction and fiction as the same genre.
         Map<String, Integer> counts = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (Book book : books) {
             if (book.getStatus() == BookStatus.BORROWED) {
-                String genre = book.getGenre().isEmpty() ? "(Unspecified)" : book.getGenre();
-                counts.merge(genre, 1, Integer::sum);
+                String genre = book.getGenre();
+                if (genre.isEmpty()) genre = "(Unspecified)";
+                int count = counts.getOrDefault(genre, 0);
+                counts.put(genre, count + 1);
             }
         }
         String winner = "None";
         int highest = 0;
-        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
-            if (entry.getValue() > highest) {
-                winner = entry.getKey();
-                highest = entry.getValue();
+        // Keep the first alphabetical genre if two counts are equal.
+        for (String genre : counts.keySet()) {
+            int count = counts.get(genre);
+            if (count > highest) {
+                winner = genre;
+                highest = count;
             }
         }
         return winner;

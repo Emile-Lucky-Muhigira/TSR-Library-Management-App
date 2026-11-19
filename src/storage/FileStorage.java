@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+// Converts books to text properties when saving, and back to objects when loading.
 public class FileStorage {
     private final Path file;
     public FileStorage() { this(Path.of("books.properties")); }
@@ -40,7 +41,9 @@ public class FileStorage {
             data.setProperty(prefix + "status", book.getStatus().name());
             data.setProperty(prefix + "borrower", book.getBorrowerName());
         }
+        // Finish writing before replacing the previous saved file.
         Path temporary = file.resolveSibling(file.getFileName() + ".tmp");
+        // try-with-resources closes the file automatically, even if writing fails.
         try (Writer writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
             data.store(writer, "LibTrack saved books");
         }
@@ -56,19 +59,24 @@ public class FileStorage {
             int count = InputValidator.number(required(data, "count"), "Saved book count");
             if (count < 0) throw new IllegalArgumentException("Invalid saved book count.");
             for (int i = 0; i < count; i++) {
-                String p = "book." + i + ".";
-                int id = InputValidator.number(required(data, p + "id"), "Saved ID");
-                String title = required(data, p + "title");
-                String author = required(data, p + "author");
-                String isbn = required(data, p + "isbn");
-                String genre = required(data, p + "genre");
-                int year = InputValidator.number(required(data, p + "year"), "Year Published");
-                BookType type = BookType.valueOf(required(data, p + "type"));
-                String details = required(data, p + "details");
-                Book book = type == BookType.PHYSICAL
-                        ? new PhysicalBook(id, title, author, isbn, genre, year, details)
-                        : new DigitalBook(id, title, author, isbn, genre, year, details);
-                book.restoreState(BookStatus.valueOf(required(data, p + "status")), required(data, p + "borrower"));
+                String prefix = "book." + i + ".";
+                int id = InputValidator.number(required(data, prefix + "id"), "Saved ID");
+                String title = required(data, prefix + "title");
+                String author = required(data, prefix + "author");
+                String isbn = required(data, prefix + "isbn");
+                String genre = required(data, prefix + "genre");
+                int year = InputValidator.number(required(data, prefix + "year"), "Year Published");
+                BookType type = BookType.valueOf(required(data, prefix + "type"));
+                String details = required(data, prefix + "details");
+                Book book;
+                if (type == BookType.PHYSICAL) {
+                    book = new PhysicalBook(id, title, author, isbn, genre, year, details);
+                } else {
+                    book = new DigitalBook(id, title, author, isbn, genre, year, details);
+                }
+                BookStatus status = BookStatus.valueOf(required(data, prefix + "status"));
+                String borrower = required(data, prefix + "borrower");
+                book.restoreState(status, borrower);
                 books.add(book);
             }
             new BookService().restoreBooks(books); // Check duplicate IDs and ISBNs before accepting the file.

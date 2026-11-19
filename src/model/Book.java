@@ -4,8 +4,9 @@ import enums.BookStatus;
 import enums.BookType;
 import validation.InputValidator;
 
-/** Shared book data and rules that protect borrowing state. */
+// Parent class: every physical or digital book has these fields and borrowing rules.
 public abstract class Book {
+    // final fields are set once, when the book is created.
     private final int id;
     private final String title;
     private final String author;
@@ -38,11 +39,17 @@ public abstract class Book {
 
     public void borrow(String name) {
         if (status != BookStatus.AVAILABLE) {
-            throw new IllegalArgumentException("Book is " + status + "; borrower/reservation holder: "
-                    + (borrowerName.isEmpty() ? "None recorded" : borrowerName) + ".");
+            throw new IllegalArgumentException(unavailableMessage());
         }
         borrowerName = InputValidator.required(name, "Borrower name");
         status = BookStatus.BORROWED;
+    }
+
+    // Used by both the menu and the borrowing rule, so they show the same message.
+    public String unavailableMessage() {
+        String holder = borrowerName;
+        if (holder.isEmpty()) holder = "None recorded";
+        return "Book is " + status + "; borrower/reservation holder: " + holder + ".";
     }
 
     public void returnBook() {
