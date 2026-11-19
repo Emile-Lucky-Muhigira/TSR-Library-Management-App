@@ -1,6 +1,7 @@
 # LibTrack - Book Library Management System
 
-**Author:** [Emile Lucky Muhigira](https://github.com/Emile-Lucky-Muhigira)  
+**Author:** [Emile Lucky Muhigira](https://github.com/Emile-Lucky-Muhigira)
+
 **Programme:** Quality Assurance Training for Starters - Java Programming
 
 A Java 17 command-line application for managing physical and digital books, searching the library, recording borrowing and returns, and reporting current availability. Data is saved locally between sessions.

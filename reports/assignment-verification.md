@@ -1,7 +1,9 @@
 # Assignment verification - LibTrack
 
-**Date:** 19 November 2026  
-**Reference:** `module_2_capstone_extended.pdf`, Java Project Assignment - Book Library Management System  
+**Date:** 19 November 2026
+
+**Reference:** `module_2_capstone_extended.pdf`, Java Project Assignment - Book Library Management System
+
 **Environment:** Windows, JDK 17.0.12
 
 ## Results
