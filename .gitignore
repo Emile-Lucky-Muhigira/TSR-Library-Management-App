@@ -1,0 +1,7 @@
+out/
+build/
+.idea/
+*.iml
+*.class
+books.properties
+books.properties.tmp
